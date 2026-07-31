@@ -1,0 +1,6 @@
+.git
+.gitignore
+AGENTS.md
+README.md
+docker-compose.yml
+docker-entrypoint.sh
