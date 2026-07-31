@@ -21,6 +21,16 @@ normalize_railway_host() {
 WEB_HOST="$(normalize_railway_host "$WEB_HOST")"
 ADMIN_HOST="$(normalize_railway_host "$ADMIN_HOST")"
 API_HOST="$(normalize_railway_host "$API_HOST")"
+
+case "$NGINX_RESOLVER" in
+  *:* )
+    case "$NGINX_RESOLVER" in
+      \[*\] ) ;;
+      * ) NGINX_RESOLVER="[$NGINX_RESOLVER]" ;;
+    esac
+    ;;
+esac
+
 export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT NGINX_RESOLVER
 
 envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${NGINX_RESOLVER}' \
