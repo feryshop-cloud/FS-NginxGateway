@@ -3,6 +3,11 @@ server {
     server_name _;
 
     client_max_body_size 20M;
+    resolver ${NGINX_RESOLVER} valid=10s ipv6=on;
+
+    set $web_upstream ${WEB_HOST}:${WEB_PORT};
+    set $admin_upstream ${ADMIN_HOST}:${ADMIN_PORT};
+    set $api_upstream ${API_HOST}:${API_PORT};
 
     location = /health {
         access_log off;
@@ -11,7 +16,7 @@ server {
     }
 
     location /api {
-        proxy_pass http://${API_HOST}:${API_PORT};
+        proxy_pass http://$api_upstream;
 
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -27,7 +32,7 @@ server {
     }
 
     location /admin/ {
-        proxy_pass http://${ADMIN_HOST}:${ADMIN_PORT};
+        proxy_pass http://$admin_upstream;
 
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -41,7 +46,7 @@ server {
     }
 
     location = /admin {
-        proxy_pass http://${ADMIN_HOST}:${ADMIN_PORT};
+        proxy_pass http://$admin_upstream;
 
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -55,7 +60,7 @@ server {
     }
 
     location / {
-        proxy_pass http://${WEB_HOST}:${WEB_PORT};
+        proxy_pass http://$web_upstream;
 
         proxy_http_version 1.1;
         proxy_set_header Host $host;

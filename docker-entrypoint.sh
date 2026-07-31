@@ -8,6 +8,8 @@ set -e
 : "${ADMIN_PORT:=8080}"
 : "${API_HOST:=fs-webtopup}"
 : "${API_PORT:=8080}"
+: "${NGINX_RESOLVER:=$(awk '/^nameserver / { print $2; exit }' /etc/resolv.conf)}"
+: "${NGINX_RESOLVER:=127.0.0.11}"
 
 normalize_railway_host() {
   case "$1" in
@@ -19,9 +21,9 @@ normalize_railway_host() {
 WEB_HOST="$(normalize_railway_host "$WEB_HOST")"
 ADMIN_HOST="$(normalize_railway_host "$ADMIN_HOST")"
 API_HOST="$(normalize_railway_host "$API_HOST")"
-export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT
+export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT NGINX_RESOLVER
 
-envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT}' \
+envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${NGINX_RESOLVER}' \
   < /templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf
 
