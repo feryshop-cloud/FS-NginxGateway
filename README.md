@@ -95,6 +95,9 @@ curl http://localhost:8080/health
 ## Key config notes
 
 - `PORT` must match the listen directive (Railway sets this).
+- On Railway, internal upstreams should use `http` plus the private DNS name under `railway.internal`.
+- For this project, the intended upstreams are `fs-webtopup.railway.internal:8080` for `/` and `/api`, and `fs-webdashboard.railway.internal:8080` for `/admin`.
+- Short upstream names such as `fs-webtopup` are expanded to `fs-webtopup.railway.internal` by `docker-entrypoint.sh`.
 - `proxy_http_version 1.1` is required for websockets and keepalive.
 - `proxy_set_header Connection ""` removes the Connection header so Nginx manages keepalive.
 - `limit_req zone=api burst=20 nodelay` rate-limits `/api` only.
