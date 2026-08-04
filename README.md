@@ -119,7 +119,7 @@ curl http://localhost:8080/health
 - Short upstream names such as `fs-webtopup` are expanded to `fs-webtopup.railway.internal` by `docker-entrypoint.sh`.
 - `proxy_http_version 1.1` is required for websockets and keepalive.
 - `proxy_set_header Connection ""` removes the Connection header so Nginx manages keepalive.
-- `limit_req zone=api burst=20 nodelay` rate-limits `/api` only.
+- `limit_req` is active across all endpoints: `zone=api burst=20 nodelay` for `/api`, `zone=admin burst=10 nodelay` for `/admin`, and `zone=general burst=50 nodelay` for `/`.
 - `server_tokens off` hides Nginx version.
 - `client_max_body_size 20M` caps uploads.
 - `access_log /dev/stdout` integrates with Railway logs.
