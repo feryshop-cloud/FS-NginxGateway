@@ -1,0 +1,19 @@
+# Environment variables
+.env
+.env.local
+.env.*
+
+# AI Agent workspace artifacts
+/.agents
+/.kiro
+/.opencode
+/.codex
+/.gemini
+/.antigravity
+/.kilo
+/.impeccable
+opencode.json
+
+# OS files
+.DS_Store
+Thumbs.db
