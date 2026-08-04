@@ -43,6 +43,8 @@ server {
 
         proxy_cache_bypass $http_pragma;
         proxy_no_cache $http_pragma;
+
+        limit_req zone=admin burst=10 nodelay;
     }
 
     location = /admin {
@@ -57,6 +59,8 @@ server {
 
         proxy_cache_bypass $http_pragma;
         proxy_no_cache $http_pragma;
+
+        limit_req zone=admin burst=10 nodelay;
     }
 
     location / {
@@ -71,5 +75,7 @@ server {
 
         proxy_cache_bypass $http_pragma;
         proxy_no_cache $http_pragma;
+
+        limit_req zone=general burst=50 nodelay;
     }
 }
