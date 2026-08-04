@@ -1,0 +1,21 @@
+name: CI - Nginx Gateway (FS-NginxGateway)
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  validate-nginx:
+    name: Validate Nginx Config Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Nginx Configuration
+        run: |
+          if [ -f "nginx.conf" ]; then
+            docker run --rm -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf:ro nginx:alpine nginx -t
+          else
+            echo "No nginx.conf found at root level, skipping syntax check."
+          fi
