@@ -34,13 +34,16 @@ Nginx Gateway
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `PORT` | yes | — | Railway sets this automatically |
-| `WEB_HOST` | yes | — | Private DNS of web service |
-| `WEB_PORT` | no | `3000` | Web service port |
-| `ADMIN_HOST` | yes | — | Private DNS of admin service |
-| `ADMIN_PORT` | no | `3000` | Admin service port |
-| `API_HOST` | yes | — | Private DNS of API service |
-| `API_PORT` | no | `3000` | API service port |
+| `PORT` | no | `8080` | Railway sets this automatically; must match the `listen` directive |
+| `WEB_HOST` | no | `fs-webtopup` | Private DNS of web service (short name auto-expanded to `*.railway.internal`) |
+| `WEB_PORT` | no | `8080` | Web service port |
+| `ADMIN_HOST` | no | `fs-webdashboard` | Private DNS of admin service (short name auto-expanded) |
+| `ADMIN_PORT` | no | `8080` | Admin service port |
+| `API_HOST` | no | `fs-webtopup` | Private DNS of API service (short name auto-expanded) |
+| `API_PORT` | no | `8080` | API service port |
+| `NGINX_RESOLVER` | no | auto (`/etc/resolv.conf`, fallback `127.0.0.11`) | DNS resolver used by Nginx for dynamic upstreams |
+
+> All defaults above are the values hardcoded in `docker-entrypoint.sh`.
 
 ## Deploy to Railway
 
@@ -51,6 +54,21 @@ Nginx Gateway
    - `ADMIN_HOST` = private DNS of your admin service
    - `API_HOST` = private DNS of your API service
 4. Railway auto-deploys on push. Health check is at `/health`.
+
+### Production reference (`honest-adventure`)
+
+The live production service `FS-NginxGateway` sets these values explicitly:
+
+| Variable | Value (production) |
+|---|---|
+| `WEB_HOST` | `fs-webtopup` → `fs-webtopup.railway.internal` |
+| `WEB_PORT` | `8080` |
+| `ADMIN_HOST` | `fs-webdashboard` → `fs-webdashboard.railway.internal` |
+| `ADMIN_PORT` | `8080` |
+| `API_HOST` | `fs-webtopup` → `fs-webtopup.railway.internal` |
+| `API_PORT` | `8080` |
+
+Short names are normalized to `*.railway.internal` by `docker-entrypoint.sh`.
 
 ### Connect services
 
@@ -79,11 +97,11 @@ docker build -t fs-nginx-gateway .
 docker run --rm -p 8080:8080 \
   -e PORT=8080 \
   -e WEB_HOST=host.docker.internal \
-  -e WEB_PORT=3000 \
+  -e WEB_PORT=8080 \
   -e ADMIN_HOST=host.docker.internal \
-  -e ADMIN_PORT=3001 \
+  -e ADMIN_PORT=8080 \
   -e API_HOST=host.docker.internal \
-  -e API_PORT=4000 \
+  -e API_PORT=8080 \
   fs-nginx-gateway
 ```
 
