@@ -33,6 +33,8 @@ esac
 
 export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT NGINX_RESOLVER
 
+mkdir -p /tmp/nginx-cache/games /tmp/nginx-cache/proxy
+
 envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${NGINX_RESOLVER}' \
   < /templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf

@@ -124,9 +124,63 @@ curl http://localhost:8080/health
 - `client_max_body_size 20M` caps uploads.
 - `access_log /dev/stdout` integrates with Railway logs.
 
+## Proxy cache (game assets)
+
+Nginx caches responses from the backend for game-related asset endpoints to reduce upstream load and improve latency.
+
+### Cached endpoints
+
+| Path | Cache zone | TTL | Purpose |
+|---|---|---|---|
+| `/api/storage/` | `games_assets` | 1 day | S3-signed game assets (banner/image/logo) |
+| `/api/proxy-image` | `api_proxy` | 1 day | Proxied S3 images via presigned URL |
+
+### Cache configuration
+
+- **Zones** are defined in `nginx.conf` at the `http {}` level:
+  ```nginx
+  proxy_cache_path /tmp/nginx-cache/games levels=1:2 keys_zone=games_assets:10m max_size=100m inactive=7d use_temp_path=off;
+  proxy_cache_path /tmp/nginx-cache/proxy levels=1:2 keys_zone=api_proxy:10m max_size=100m inactive=7d use_temp_path=off;
+  ```
+- **Location blocks** in `templates/default.conf.template` enable caching with:
+  - `proxy_cache <zone>` — binds the location to the cache zone.
+  - `proxy_cache_valid 200 1d` — caches successful responses for 1 day.
+  - `proxy_cache_key $request_uri` — includes query string in cache key (important for `/api/proxy-image?path=...`).
+  - `add_header X-Cache-Status $upstream_cache_status always` — exposes cache hit/miss status on every response.
+
+### Cache bypass
+
+Send `Pragma: no-cache` (or `Cache-Control: no-cache`) header to bypass the cache for a specific request. This is preserved from the original config via:
+
+```nginx
+proxy_cache_bypass $http_pragma;
+proxy_no_cache $http_pragma;
+```
+
+### Cache invalidation
+
+- Files are automatically evicted after `inactive=7d` if not requested.
+- The cache is per-replica (stateless containers). With 2 Railway replicas, each maintains its own cache independently.
+- To force a full invalidation, redeploy the service (container restart clears `/tmp/nginx-cache`).
+
+### Monitoring
+
+Check `X-Cache-Status` in response headers:
+
+```bash
+curl -I https://your-domain.com/api/storage/games/image/example.webp
+# Look for: X-Cache-Status: HIT | MISS | BYPASS | EXPIRED
+```
+
+- `HIT` — served from Nginx cache.
+- `MISS` — fetched from upstream, then cached.
+- `BYPASS` — cache bypassed due to `Pragma: no-cache`.
+- `EXPIRED` — cached entry was stale and revalidated.
+
 ## Troubleshooting
 
 - **502 Bad Gateway**: upstream host/port wrong, or service crashed. Check Railway logs.
 - **404 on /health**: ensure template rendered successfully; check container logs.
 - **Websocket drops**: ensure `proxy_http_version 1.1` and `proxy_set_header Connection ""` are present.
 - **Config syntax error**: check Railway deploy logs for `nginx -t` output.
+- **Cache not working**: verify `proxy_cache_path` directories exist (`/tmp/nginx-cache/games`, `/tmp/nginx-cache/proxy`) and that `docker-entrypoint.sh` creates them on startup.
