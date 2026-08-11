@@ -3,7 +3,7 @@ server {
     server_name _;
 
     client_max_body_size 20M;
-    resolver ${NGINX_RESOLVER} valid=10s ipv6=on;
+    resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
 
     set $web_upstream ${WEB_HOST}:${WEB_PORT};
     set $admin_upstream ${ADMIN_HOST}:${ADMIN_PORT};
