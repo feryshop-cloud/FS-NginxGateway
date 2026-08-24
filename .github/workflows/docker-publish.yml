@@ -14,6 +14,7 @@ env:
 
 jobs:
   build-and-push:
+    name: Build & Push Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -56,10 +57,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Deploy ke VPS secara otomatis saat push ke branch main
-      - name: Deploy to VPS
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: "VPS Sumopod"
+    steps:
+      - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
-        if: github.ref == 'refs/heads/main' && secrets.VPS_HOST != ''
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
