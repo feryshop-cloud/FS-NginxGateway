@@ -1,9 +1,9 @@
 # ==============================================================================
-# 1. WEBMAIL SUBDOMAIN SERVER BLOCK (webmail.*)
+# 1. WEBMAIL SUBDOMAIN SERVER BLOCK
 # ==============================================================================
 server {
     listen ${PORT};
-    server_name webmail.* ~^webmail\.;
+    server_name ${WEBMAIL_SERVER_NAME};
 
     client_max_body_size 25M;
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
@@ -36,6 +36,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $http_connection;
 
@@ -47,11 +48,11 @@ server {
 }
 
 # ==============================================================================
-# 2. MONITORING SUBDOMAIN SERVER BLOCK (monitoring.* -> Grafana)
+# 2. MONITORING SUBDOMAIN SERVER BLOCK (Grafana)
 # ==============================================================================
 server {
     listen ${PORT};
-    server_name monitoring.* ~^monitoring\.;
+    server_name ${MONITORING_SERVER_NAME};
 
     client_max_body_size 20M;
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
@@ -73,6 +74,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $http_connection;
 
@@ -94,6 +96,8 @@ server {
     set $web_upstream ${WEB_HOST}:${WEB_PORT};
     set $admin_upstream ${ADMIN_HOST}:${ADMIN_PORT};
     set $api_upstream ${API_HOST}:${API_PORT};
+    set $webmail_upstream ${WEBMAIL_HOST}:${WEBMAIL_PORT};
+    set $monitoring_upstream ${MONITORING_HOST}:${MONITORING_PORT};
 
     location = /health {
         access_log off;
@@ -200,6 +204,50 @@ server {
         proxy_no_cache $http_pragma;
 
         limit_req zone=api burst=20 nodelay;
+    }
+
+    # WebMail Path Fallback (/webmail)
+    location /webmail/ {
+        proxy_pass http://$webmail_upstream/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $http_connection;
+
+        proxy_cache_bypass $http_pragma;
+        proxy_no_cache $http_pragma;
+
+        limit_req zone=general burst=50 nodelay;
+    }
+
+    location = /webmail {
+        return 301 /webmail/;
+    }
+
+    # Monitoring / Grafana Path Fallback (/monitoring)
+    location /monitoring/ {
+        proxy_pass http://$monitoring_upstream/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $http_connection;
+
+        proxy_cache_bypass $http_pragma;
+        proxy_no_cache $http_pragma;
+    }
+
+    location = /monitoring {
+        return 301 /monitoring/;
     }
 
     location / {

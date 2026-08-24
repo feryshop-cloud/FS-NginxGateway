@@ -10,8 +10,10 @@ set -e
 : "${API_PORT:=8080}"
 : "${WEBMAIL_HOST:=fs-webmail}"
 : "${WEBMAIL_PORT:=3000}"
+: "${WEBMAIL_SERVER_NAME:=webmail.* ~*^webmail\..*$ ~*^.*webmail.*$ ~*^mail\..*$}"
 : "${MONITORING_HOST:=fs-grafana}"
 : "${MONITORING_PORT:=3000}"
+: "${MONITORING_SERVER_NAME:=monitoring.* grafana.* ~*^monitoring\..*$ ~*^.*monitoring.*$ ~*^grafana\..*$ ~*^.*grafana.*$}"
 : "${NGINX_RESOLVER:=$(awk '/^nameserver / { print $2; exit }' /etc/resolv.conf)}"
 : "${NGINX_RESOLVER:=127.0.0.11}"
 
@@ -41,11 +43,11 @@ case "$NGINX_RESOLVER" in
     ;;
 esac
 
-export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT WEBMAIL_HOST WEBMAIL_PORT MONITORING_HOST MONITORING_PORT NGINX_RESOLVER
+export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT WEBMAIL_HOST WEBMAIL_PORT WEBMAIL_SERVER_NAME MONITORING_HOST MONITORING_PORT MONITORING_SERVER_NAME NGINX_RESOLVER
 
 mkdir -p /tmp/nginx-cache/games /tmp/nginx-cache/proxy
 
-envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${WEBMAIL_HOST} ${WEBMAIL_PORT} ${MONITORING_HOST} ${MONITORING_PORT} ${NGINX_RESOLVER}' \
+envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${WEBMAIL_HOST} ${WEBMAIL_PORT} ${WEBMAIL_SERVER_NAME} ${MONITORING_HOST} ${MONITORING_PORT} ${MONITORING_SERVER_NAME} ${NGINX_RESOLVER}' \
   < /templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf
 
