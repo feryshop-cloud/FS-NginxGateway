@@ -15,6 +15,17 @@ server {
         add_header Content-Type text/plain;
     }
 
+    location = /stub_status {
+        stub_status;
+        access_log off;
+        allow 127.0.0.1;
+        allow 10.0.0.0/8;
+        allow 172.16.0.0/12;
+        allow 192.168.0.0/16;
+        allow 100.64.0.0/10;
+        deny all;
+    }
+
     location /api {
         proxy_pass http://$api_upstream;
 
