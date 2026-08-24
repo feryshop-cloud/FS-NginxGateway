@@ -41,6 +41,8 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=sha-,enable=true
+            type=raw,value=build-${{ github.run_number }}
+            type=raw,value={{date 'YYYYMMDD-HHmmss'}}
             type=ref,event=tag
 
       - name: Build and push Docker image
