@@ -62,7 +62,7 @@ jobs:
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: "VPS Sumopod"
+    environment: VPS-Sumopod
     steps:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
