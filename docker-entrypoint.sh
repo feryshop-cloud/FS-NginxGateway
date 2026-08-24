@@ -8,6 +8,8 @@ set -e
 : "${ADMIN_PORT:=8080}"
 : "${API_HOST:=fs-webtopup}"
 : "${API_PORT:=8080}"
+: "${WEBMAIL_HOST:=fs-webmail}"
+: "${WEBMAIL_PORT:=3000}"
 : "${NGINX_RESOLVER:=$(awk '/^nameserver / { print $2; exit }' /etc/resolv.conf)}"
 : "${NGINX_RESOLVER:=127.0.0.11}"
 
@@ -25,6 +27,7 @@ normalize_host() {
 WEB_HOST="$(normalize_host "$WEB_HOST")"
 ADMIN_HOST="$(normalize_host "$ADMIN_HOST")"
 API_HOST="$(normalize_host "$API_HOST")"
+WEBMAIL_HOST="$(normalize_host "$WEBMAIL_HOST")"
 
 case "$NGINX_RESOLVER" in
   *:* )
@@ -35,11 +38,11 @@ case "$NGINX_RESOLVER" in
     ;;
 esac
 
-export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT NGINX_RESOLVER
+export PORT WEB_HOST WEB_PORT ADMIN_HOST ADMIN_PORT API_HOST API_PORT WEBMAIL_HOST WEBMAIL_PORT NGINX_RESOLVER
 
 mkdir -p /tmp/nginx-cache/games /tmp/nginx-cache/proxy
 
-envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${NGINX_RESOLVER}' \
+envsubst '${PORT} ${WEB_HOST} ${WEB_PORT} ${ADMIN_HOST} ${ADMIN_PORT} ${API_HOST} ${API_PORT} ${WEBMAIL_HOST} ${WEBMAIL_PORT} ${NGINX_RESOLVER}' \
   < /templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf
 
