@@ -11,16 +11,20 @@ set -e
 : "${NGINX_RESOLVER:=$(awk '/^nameserver / { print $2; exit }' /etc/resolv.conf)}"
 : "${NGINX_RESOLVER:=127.0.0.11}"
 
-normalize_railway_host() {
-  case "$1" in
-    *.*|"" ) printf '%s' "$1" ;;
-    * ) printf '%s.railway.internal' "$1" ;;
-  esac
+normalize_host() {
+  if [ -n "$RAILWAY_ENVIRONMENT" ] || [ -n "$RAILWAY_PROJECT_ID" ] || [ "$USE_RAILWAY_INTERNAL" = "true" ]; then
+    case "$1" in
+      *.*|"" ) printf '%s' "$1" ;;
+      * ) printf '%s.railway.internal' "$1" ;;
+    esac
+  else
+    printf '%s' "$1"
+  fi
 }
 
-WEB_HOST="$(normalize_railway_host "$WEB_HOST")"
-ADMIN_HOST="$(normalize_railway_host "$ADMIN_HOST")"
-API_HOST="$(normalize_railway_host "$API_HOST")"
+WEB_HOST="$(normalize_host "$WEB_HOST")"
+ADMIN_HOST="$(normalize_host "$ADMIN_HOST")"
+API_HOST="$(normalize_host "$API_HOST")"
 
 case "$NGINX_RESOLVER" in
   *:* )
