@@ -10,10 +10,10 @@ set -e
 : "${API_PORT:=8080}"
 : "${WEBMAIL_HOST:=fs-webmail}"
 : "${WEBMAIL_PORT:=3000}"
-: "${WEBMAIL_SERVER_NAME:=webmail.* ~*^webmail\..*$ ~*^.*webmail.*$ ~*^mail\..*$}"
+: "${WEBMAIL_SERVER_NAME:=webmail.* mail.* ~^webmail ~^mail}"
 : "${MONITORING_HOST:=fs-grafana}"
 : "${MONITORING_PORT:=3000}"
-: "${MONITORING_SERVER_NAME:=monitoring.* grafana.* ~*^monitoring\..*$ ~*^.*monitoring.*$ ~*^grafana\..*$ ~*^.*grafana.*$}"
+: "${MONITORING_SERVER_NAME:=monitoring.* grafana.* ~^monitoring ~^grafana}"
 : "${NGINX_RESOLVER:=$(awk '/^nameserver / { print $2; exit }' /etc/resolv.conf)}"
 : "${NGINX_RESOLVER:=127.0.0.11}"
 
