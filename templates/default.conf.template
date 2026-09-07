@@ -116,6 +116,11 @@ server {
         deny all;
     }
 
+    # Fallback redirect: direct /api/digiflazz calls to /admin/api/digiflazz
+    location ^~ /api/digiflazz {
+        return 307 /admin$request_uri;
+    }
+
     location /api {
         proxy_pass http://$api_upstream;
 
