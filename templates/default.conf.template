@@ -98,8 +98,33 @@ server {
     set $api_upstream ${API_HOST}:${API_PORT};
     set $webmail_upstream ${WEBMAIL_HOST}:${WEBMAIL_PORT};
     set $monitoring_upstream ${MONITORING_HOST}:${MONITORING_PORT};
+    set $digiflazz_upstream ${DIGIFLAZZ_HOST}:${DIGIFLAZZ_PORT};
+
+    # Digiflazz Webhook Ingress (proxy ke fs-digiflazz-service)
+    location ^~ /webhooks/digiflazz {
+        rewrite ^/webhooks/digiflazz/?$ /v1/webhook break;
+        proxy_pass http://$digiflazz_upstream;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+
+        # Explicitly forward Digiflazz custom webhook headers
+        proxy_set_header X-Hub-Signature $http_x_hub_signature;
+        proxy_set_header X-Digiflazz-Event $http_x_digiflazz_event;
+        proxy_set_header X-Digiflazz-Delivery $http_x_digiflazz_delivery;
+
+        proxy_cache_bypass $http_pragma;
+        proxy_no_cache $http_pragma;
+
+        limit_req zone=api burst=20 nodelay;
+    }
 
     location = /health {
+
         access_log off;
         return 200 'OK';
         add_header Content-Type text/plain;
