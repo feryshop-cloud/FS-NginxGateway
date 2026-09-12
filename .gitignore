@@ -14,6 +14,9 @@
 /.impeccable
 opencode.json
 
+# SSL certificates (NEVER commit private keys)
+ssl/
+
 # OS files
 .DS_Store
 Thumbs.db

@@ -4,6 +4,18 @@
 server {
     listen ${PORT};
     server_name ${WEBMAIL_SERVER_NAME};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 8443 ssl;
+    server_name ${WEBMAIL_SERVER_NAME};
+
+    ssl_certificate /etc/nginx/ssl/origin-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/origin-key.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
 
     client_max_body_size 25M;
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
@@ -53,6 +65,18 @@ server {
 server {
     listen ${PORT};
     server_name ${MONITORING_SERVER_NAME};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 8443 ssl;
+    server_name ${MONITORING_SERVER_NAME};
+
+    ssl_certificate /etc/nginx/ssl/origin-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/origin-key.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
 
     client_max_body_size 20M;
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
@@ -89,6 +113,18 @@ server {
 server {
     listen ${PORT} default_server;
     server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 8443 ssl default_server;
+    server_name _;
+
+    ssl_certificate /etc/nginx/ssl/origin-cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/origin-key.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
 
     client_max_body_size 20M;
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
