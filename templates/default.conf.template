@@ -195,6 +195,24 @@ server {
         limit_req zone=api burst=20 nodelay;
     }
 
+    # Direct proxy for /api/notifications to admin upstream
+    location ^~ /api/notifications {
+        rewrite ^/api/notifications(.*)$ /admin/api/notifications$1 break;
+        proxy_pass http://$admin_upstream;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+
+        proxy_cache_bypass $http_pragma;
+        proxy_no_cache $http_pragma;
+
+        limit_req zone=api burst=20 nodelay;
+    }
+
     location /api {
         proxy_pass http://$api_upstream;
 
